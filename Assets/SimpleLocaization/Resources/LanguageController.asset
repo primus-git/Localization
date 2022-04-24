@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f2e737e6a3e3b0409aae91c60a0f9f1, type: 3}
   m_Name: LanguageController
   m_EditorClassIdentifier: 
-  languages: []
+  languages:
+  - LanguageName: Hindi
+    translation: {fileID: 0}

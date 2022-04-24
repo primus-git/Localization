@@ -18,8 +18,6 @@ namespace SimpleLocalization
             EditorWindow window = GetWindow<LocEditor>("Simple Localization");
 
             window.minSize = new Vector2(300f, 300f);
-
-
         }
 
         private void OnGUI()
@@ -28,40 +26,35 @@ namespace SimpleLocalization
 
 
         }
-
-        int toolbarInt = 0;
-        string[] toolbarStrings = { "Language", "Translation" };
-
+       
         void GetToolBar()
         {
-            toolbarInt = GUILayout.Toolbar(toolbarInt, toolbarStrings);
-            if (toolbarInt == 0)
-            {
+           
+            //   Debug.LogError(toolInt);
+         
                 Getpanels();
                 GetField();
-            }
-            else
-            {
-                RenderLeftPanel();
-            }
+            
+           
         }
         string _name;
         void GetField()
         {
             GUILayout.Space(20);
+            GUILayout.FlexibleSpace();
             _name = EditorGUILayout.TextField("Language Name", _name);
             if (GUILayout.Button("Create Language"))
             {
                 if (!string.IsNullOrEmpty(_name))
                 {
                     languageController.CreateNewlang(_name);
-
                 }
                 else
                 {
                     Debug.LogError("Null Language name");
                     _name = null;
                 }
+                AssetDatabase.Refresh();
             }
             if (GUILayout.Button("Clear"))
             {
@@ -80,21 +73,20 @@ namespace SimpleLocalization
         {
             if (languageController != null)
             {
-
-
                 foreach (var s in languageController.languages)
                 {
+                    GUILayout.Space(5);
                     GUILayout.BeginHorizontal();
-                    GUILayout.Space(20);
 
+                    //   string temp = GUILayout.TextField((string)s.LanguageName);
 
-                    string temp = GUILayout.TextField((string)s.LanguageName);
+                    GUILayout.Label(s.LanguageName.ToString());
 
-                    GUILayout.Label(temp);
-
+                    GUILayout.FlexibleSpace();
                     if (GUILayout.Button("Open"))
                     {
-
+                        this.translation = s.translation; 
+                        ShowOtherWindow();
                     }
 
                     GUILayout.EndHorizontal();
@@ -102,57 +94,6 @@ namespace SimpleLocalization
             }
         }
 
-        #endregion
-
-        #region Right panel
-        void RenderLeftPanel()
-        {
-            EditorGUILayout.BeginVertical();
-            //source = EditorGUILayout.ObjectField(source, typeof(UnityEngine.Object), true);
-
-
-            if (languageController != null)
-            {
-
-                foreach (var a in languageController.languages)
-                {
-                    foreach (var s in a.translation.GetType().GetFields())
-                    {
-
-
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Space(20);
-                        GUILayout.Label(s.Name);
-
-                        var val = s.GetValue(languageController);
-                        Debug.Log(val);
-                        if (val.GetType() == typeof(System.Int32))
-                        {
-                            // string temp = GUILayout.TextField(s.GetValue(itemData.configuration).ToString());
-                            // int parsedValue = 0;
-                            // int.TryParse(temp, out parsedValue);
-                            // s.SetValue(itemData.configuration, parsedValue);
-                        }
-
-                        else if (val.GetType() == typeof(System.String))
-                        {
-                            string temp = GUILayout.TextField((string)s.GetValue(languageController));
-                            s.SetValue(languageController, temp);
-                        }
-
-                        GUILayout.EndHorizontal();
-                    }
-
-                }
-            }
-
-            EditorGUILayout.EndVertical();
-        }
-
-        void RenderTranslationButtons()
-        {
-
-        }
         #endregion
 
 
@@ -164,13 +105,14 @@ namespace SimpleLocalization
 
         static void CheckForCurrentLocaliczation()
         {
+
             if (languageController != null)
                 return;
-
 
             languageController = Resources.Load("LanguageController", typeof(LanguageController)) as LanguageController;
             if (languageController == null)
             {
+                Debug.LogError("Insert");
                 LanguageController asset = ScriptableObject.CreateInstance<LanguageController>();
                 string path = "Assets/SimpleLocaization/Resources";
                 CheckDirectry(path);
@@ -183,8 +125,6 @@ namespace SimpleLocalization
             }
         }
 
-
-
         public static void CheckDirectry(string path)
         {
             if (!Directory.Exists(path))
@@ -193,7 +133,15 @@ namespace SimpleLocalization
             }
         }
 
+        public Translation translation;
+        void ShowOtherWindow()
+        {
+            TranslationEditor.translation = this.translation;
+            CheckForCurrentLocaliczation();
+            string name = this.translation.name;
+            EditorWindow window = GetWindow<TranslationEditor>(name);
 
-
+            window.minSize = new Vector2(300f, 300f);
+        }
     }
 }
